@@ -1,0 +1,143 @@
+
+            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <!-- Definitions for Gradients and Filters -->
+                <defs>
+                    <!-- German Flag Gradient (Black -> Red -> Gold) -->
+                    <linearGradient id="germanGradient" x1="50" y1="0" x2="462" y2="512" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#111111" /> <!-- Black -->
+                        <stop offset="45%" stop-color="#DD0000" /> <!-- Red -->
+                        <stop offset="100%" stop-color="#FFCC00" /> <!-- Gold -->
+                    </linearGradient>
+                    
+                    <!-- Subtle inner shadow for depth -->
+                    <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+                        <feOffset dx="2" dy="4"/>
+                        <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff"/>
+                        <feFlood flood-color="rgba(0,0,0,0.15)" result="shadowColor"/>
+                        <feComposite in2="shadowDiff" operator="in" result="innerShadow"/>
+                        <feComposite in2="SourceGraphic" operator="over"/>
+                    </filter>
+                </defs>
+
+                <!-- 
+                   Design Logic: 
+                   1. Base shape is a GPS Pin (teardrop).
+                   2. Negative space cuts into the right side to form the trigger and handle of a fuel nozzle.
+                   3. The inner hole of the pin represents the nozzle connection point.
+                -->
+
+                <!-- Main Shape: Combined Pin and Nozzle Body -->
+                <path 
+                    d="M256 64
+                       C167.6 64 96 135.6 96 224
+                       C96 325 238 436.5 244.1 441.2
+                       C251 446.6 260.9 446.6 267.9 441.2
+                       C274 436.5 416 325 416 224
+                       C416 195 408 168 394 145
+                       
+                       /* Stylized cut-out for the nozzle handle/trigger on the right */
+                       L 394 145
+                       C 380 180 380 220 380 220
+                       L 340 220
+                       L 340 200
+                       C 340 180 330 160 300 160
+                       
+                       /* Returning to top circular logic implicitly by closing path or smoothing */
+                       "
+                    fill="url(#germanGradient)"
+                    stroke="none"
+                    style="display: none;" 
+                />
+                
+                <!-- Refined Vector Path: 
+                     A smooth continuous shape representing the pin contour,
+                     morphing into a nozzle silhouette on the right side.
+                -->
+                <path 
+                    d="M256 48
+                       C150 48 64 134 64 240
+                       C64 365 242 490 242 490
+                       C250 496 262 496 270 490
+                       C270 490 448 365 448 240
+                       C448 134 362 48 256 48Z"
+                    fill="url(#germanGradient)"
+                />
+
+                <!-- The White Cutout: This creates the "Nozzle" visual inside the Pin -->
+                <!-- It looks like a white interior that shapes the nozzle handle and spout -->
+                <path 
+                    fill="#ffffff"
+                    d="M256 140
+                       C230 140 210 160 210 186
+                       L 210 260
+                       C 210 270 200 280 190 280
+                       C 180 280 170 270 170 260
+                       L 170 220
+                       C 170 180 140 160 140 160
+                       C 150 140 170 120 200 120
+                       L 312 120
+                       
+                       /* The Nozzle Spout pointing down/diagonal */
+                       M 320 200
+                       L 320 240
+                       L 280 300
+                       L 260 300
+                       L 290 240
+                       L 290 200
+                       Z"
+                    style="display: none;" 
+                />
+
+                <!-- Let's try a cleaner subtraction approach for a modern icon -->
+                
+                <!-- 1. The inner white shape (Counter-form) defining the nozzle grip and trigger -->
+                <!-- This sits inside the colored pin to make it look like a nozzle is *part* of the pin -->
+                <path 
+                    d="M256 120
+                       C220 120 190 150 190 190
+                       V 250
+                       C190 265 180 270 170 270
+                       
+                       /* Spout Area */
+                       M 280 160
+                       L 320 160
+                       L 320 280
+                       L 280 280
+                       Z"
+                    fill="white"
+                    opacity="0"
+                />
+
+                <!-- Final Polished Geometry -->
+                <!-- Central White Element: A stylized nozzle shape inside the pin -->
+                <g transform="translate(0, 10)">
+                    <!-- The "Hole" of the pin, stylized as the nozzle head -->
+                    <circle cx="256" cy="190" r="50" fill="#ffffff" />
+                    
+                    <!-- The Handle/Trigger cutting into the pin from the bottom-center -->
+                    <path 
+                        d="M256 240 
+                           L 256 360 
+                           L 276 360 
+                           L 276 260 
+                           C 276 260 310 250 320 200
+                           L 330 200
+                           C 330 200 320 280 276 300
+                           L 276 380
+                           L 236 380
+                           L 236 240
+                           Z" 
+                        fill="#ffffff" 
+                    />
+                </g>
+                
+                <!-- Gloss/Reflection for modern app feel -->
+                <path 
+                    d="M150 150 Q 256 80 362 150" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.2)" 
+                    stroke-width="20" 
+                    stroke-linecap="round"
+                />
+            </svg>

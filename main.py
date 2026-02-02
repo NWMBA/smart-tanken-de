@@ -1,3 +1,10 @@
+"""
+Smart-Tanken DE API
+Author: Nathan Williams <hello@hinwise.com>
+Description: High-performance fuel intelligence wrapper for the German market.
+License: MIT
+"""
+
 import os
 import math
 import json
@@ -5,8 +12,49 @@ import requests
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, Request
 from dotenv import load_dotenv
+
+app = FastAPI(
+    title="Smart-Tanken DE API",
+    description="Intelligence-driven fuel pricing and logistics benchmarking for Germany.",
+    version="1.0.0",
+    contact={
+        "name": "NW Hinwise Solutions",
+        "url": "https://www.hinwise.com", # Optional
+        "email": "hello@hinwise.com",
+    },
+    license_info={
+        "name": "MIT License",
+    }
+)
+
+@app.middleware("http")
+async def verify_rapidapi_proxy(request: Request, call_next):
+    # Skip security check for the root and docs so you can still see them
+    if request.url.path in ["/", "/docs", "/openapi.json", "/health"]:
+        return await call_next(request)
+    
+    # Check for the secret header
+    proxy_secret = request.headers.get("X-RapidAPI-Proxy-Secret")
+    
+    if proxy_secret != RAPIDAPI_PROXY_SECRET:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=403, 
+            content={"detail": "Access denied. Requests must come through RapidAPI."}
+        )
+    
+    return await call_next(request)
+
+@app.get("/health", tags=["System"])
+async def health_check():
+    """Verifies the API is alive and reachable."""
+    return {
+        "status": "online",
+        "timestamp": datetime.now().isoformat(),
+        "provider": "Tankerkönig CC-BY-4.0"
+    }
 
 # --- INITIALIZATION ---
 load_dotenv()
