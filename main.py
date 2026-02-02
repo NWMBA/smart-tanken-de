@@ -13,7 +13,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Query, Depends, Request
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+
+# --- INITIALIZATION ---
+load_dotenv()
+TANKER_API_KEY = os.getenv("TANKER_API_KEY")
 
 app = FastAPI(
     title="Smart-Tanken DE API",
@@ -28,40 +33,36 @@ app = FastAPI(
         "name": "MIT License",
     }
 )
-
-
-@app.get("/health", tags=["System"])
+# --- 1. THE TOP PRIORITY ROUTE ---
+# Define this before ANY middleware or other routes
+@app.get("/health")
 async def health_check():
-    """Verifies the API is alive and reachable."""
-    return {
-        "status": "online",
-        "timestamp": datetime.now().isoformat(),
-        "provider": "Tankerkönig CC-BY-4.0"
-    }
+    return {"status": "online", "message": "Smart-Tanken DE is operational"}
 
-
+# --- 2. THE SECURITY MIDDLEWARE ---
 @app.middleware("http")
 async def verify_rapidapi_proxy(request: Request, call_next):
-    # Skip security check for the root and docs so you can still see them
-    if request.url.path in ["/", "/docs", "/openapi.json", "/health"]:
+    # Normalize path: remove trailing slashes and dots
+    path = request.url.path.rstrip("./ ") 
+    
+    # VIP Pass: Let these through without a secret
+    # Added '/' to the list so your base URL also works for health checks
+    if path in ["", "/health", "/docs", "/openapi.json"]:
         return await call_next(request)
     
-    # Check for the secret header
+    # Check for Proxy Secret
     proxy_secret = request.headers.get("X-RapidAPI-Proxy-Secret")
+    expected_secret = os.getenv("RAPIDAPI_PROXY_SECRET")
     
-    if proxy_secret != RAPIDAPI_PROXY_SECRET:
-        from fastapi.responses import JSONResponse
+    if not proxy_secret or proxy_secret != expected_secret:
         return JSONResponse(
             status_code=403, 
-            content={"detail": "Access denied. Requests must come through RapidAPI."}
+            content={"detail": "Access denied. Use RapidAPI to access this resource."}
         )
     
     return await call_next(request)
 
-# --- INITIALIZATION ---
-load_dotenv()
-app = FastAPI(title="Smart-Tanken DE API")
-TANKER_API_KEY = os.getenv("TANKER_API_KEY")
+
 
 # --- DATA LOADING ---
 BASE_DIR = Path(__file__).resolve().parent
