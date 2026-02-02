@@ -29,6 +29,17 @@ app = FastAPI(
     }
 )
 
+
+@app.get("/health", tags=["System"])
+async def health_check():
+    """Verifies the API is alive and reachable."""
+    return {
+        "status": "online",
+        "timestamp": datetime.now().isoformat(),
+        "provider": "Tankerkönig CC-BY-4.0"
+    }
+
+
 @app.middleware("http")
 async def verify_rapidapi_proxy(request: Request, call_next):
     # Skip security check for the root and docs so you can still see them
@@ -46,15 +57,6 @@ async def verify_rapidapi_proxy(request: Request, call_next):
         )
     
     return await call_next(request)
-
-@app.get("/health", tags=["System"])
-async def health_check():
-    """Verifies the API is alive and reachable."""
-    return {
-        "status": "online",
-        "timestamp": datetime.now().isoformat(),
-        "provider": "Tankerkönig CC-BY-4.0"
-    }
 
 # --- INITIALIZATION ---
 load_dotenv()
